@@ -7,12 +7,13 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-playground/validator/v10"
 )
 
 type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	Bio  string `json:"bio"`
+   ID   string `json:"id" validate:"required"`
+   Name string `json:"name" validate:"required"`
+   Bio  string `json:"bio" validate:"required"`
 }
 
 var users = []User{
@@ -44,14 +45,20 @@ func addUser(w http.ResponseWriter, r *http.Request) {
       return
    }
 
+   // Initialize the validator
+   validate := validator.New()
+
+   // Decode the JSON request body
    err := json.NewDecoder(r.Body).Decode(&user)
    if err != nil {
       http.Error(w, err.Error(), http.StatusBadRequest)
       return
    }
 
-   if user.ID == "" || user.Name == "" || user.Bio == "" {
-      http.Error(w, "User fields cannot be empty", http.StatusBadRequest)
+   // Validate the user struct
+   if err := validate.Struct(user); err != nil {
+      // Handle validation errors
+      http.Error(w, err.Error(), http.StatusBadRequest)
       return
    }
 
