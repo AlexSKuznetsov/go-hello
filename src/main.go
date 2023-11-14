@@ -37,27 +37,30 @@ func main() {
 }
 
 func addUser(w http.ResponseWriter, r *http.Request) {
-	var user User
+   var user User
 
-	if r.ContentLength == 0 {
-		http.Error(w, "Request body is empty", http.StatusBadRequest)
-		return
-	}
+   if r.ContentLength == 0 {
+      http.Error(w, "Request body is empty", http.StatusBadRequest)
+      return
+   }
 
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+   err := json.NewDecoder(r.Body).Decode(&user)
+   if err != nil {
+      http.Error(w, err.Error(), http.StatusBadRequest)
+      return
+   }
 
-	if user.ID == "" || user.Name == "" || user.Bio == "" {
-		http.Error(w, "User fields cannot be empty", http.StatusBadRequest)
-		return
-	}
+   if user.ID == "" || user.Name == "" || user.Bio == "" {
+      http.Error(w, "User fields cannot be empty", http.StatusBadRequest)
+      return
+   }
 
-	users = append(users, user)
+   users = append(users, user)
 
-	// Return updated user list as JSON
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(users)
+   // Return updated user list as JSON
+   w.Header().Set("Content-Type", "application/json")
+   if err := json.NewEncoder(w).Encode(users); err != nil {
+      http.Error(w, err.Error(), http.StatusInternalServerError)
+      return
+   }
 }
